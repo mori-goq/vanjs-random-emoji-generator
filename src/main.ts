@@ -1,24 +1,49 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import van from 'vanjs-core'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+import { emojiList } from './constants'
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const { div, h1, label, button, input, span } = van.tags
+
+const RandomEmojiGenerator = () => {
+  const emojiCount = van.state(1)
+  const randomEmojiText = van.state('')
+
+  const generateRandomEmojiText = () => {
+    const randomEmojiList = [...new Array(emojiCount.val).keys()].map(() => {
+      const randomNumber = Math.floor(Math.random() * emojiList.length)
+      return emojiList[randomNumber]
+    })
+
+    randomEmojiText.val = randomEmojiList.join('')
+  }
+
+  // init
+  generateRandomEmojiText()
+
+  return div(
+    { class: 'random-emoji-generator' },
+    h1('Random Emoji Generator'),
+    div(
+      { class: 'emoji-controls' },
+      label({ for: 'emoji-count' }, 'Number of Emojis: '),
+      input({
+        id: 'emoji-count',
+        type: 'number',
+        value: emojiCount,
+        oninput: (event: InputEvent) => {
+          emojiCount.val = +(event.target as HTMLInputElement).value
+        },
+      }),
+      button(
+        {
+          type: 'button',
+          onclick: () => generateRandomEmojiText(),
+        },
+        'Generate',
+      ),
+    ),
+    div({ class: 'emoji-display' }, span({ class: 'emoji' }, randomEmojiText)),
+  )
+}
+
+van.add(document.getElementById('app')!, RandomEmojiGenerator())
